@@ -4,7 +4,7 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
-// import { StyledHeader } from './Searchbar/Searchbar.styled';
+import { Loader } from './Laoder/Loader';
 import { getImages } from 'services/imageSearchApi';
 
 export class App extends Component {
@@ -18,20 +18,25 @@ export class App extends Component {
   };
 
   async componentDidUpdate(_, prevState) {
-    const { query, page } = this.state;
+    const { query, page, isLoading } = this.state;
 
     const stateChange = prevState.query !== query || prevState.page !== page;
 
     if (stateChange) {
       try {
+        this.setState({ isLoading: true });
         const response = await getImages(query, page);
         const data = await response.hits;
+        if (data.length === 0) {
+          alert(`We can't find any images`);
+        }
         const totalPages = Math.ceil(response.total / 12);
 
         this.setState(prevState => ({
           images: [...prevState.images, ...data],
           totalPages,
         }));
+        this.setState({ isLoading: false });
       } catch (error) {
         console.log(error);
       }
@@ -70,7 +75,8 @@ export class App extends Component {
   };
 
   render() {
-    const { images, page, totalPages, originalImageUrl, ImageAlt } = this.state;
+    const { images, page, totalPages, originalImageUrl, ImageAlt, isLoading } =
+      this.state;
 
     const canLoadMore = images.length > 0 && page !== totalPages;
 
@@ -78,12 +84,13 @@ export class App extends Component {
       <Container>
         <Searchbar onSubmit={this.handleSubmitForm} />
         <ImageGallery images={images} onImageClick={this.handleImageClick} />
+        {isLoading && <Loader />}
         {canLoadMore && <Button loadMode={this.handleBtnClick} />}
         {originalImageUrl && (
           <Modal
             url={originalImageUrl}
             alt={ImageAlt}
-            close={this.closeModal}
+            closeModal={this.closeModal}
           />
         )}
       </Container>
