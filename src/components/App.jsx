@@ -18,7 +18,7 @@ export class App extends Component {
   };
 
   async componentDidUpdate(_, prevState) {
-    const { query, page, isLoading } = this.state;
+    const { query, page } = this.state;
 
     const stateChange = prevState.query !== query || prevState.page !== page;
 
