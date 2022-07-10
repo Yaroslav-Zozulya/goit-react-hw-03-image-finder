@@ -15,6 +15,7 @@ export class App extends Component {
     isLoading: false,
     query: '',
     page: 0,
+    totalPages: 0,
   };
 
   async componentDidUpdate(_, prevState) {
@@ -30,11 +31,13 @@ export class App extends Component {
         if (data.length === 0) {
           alert(`We can't find any images`);
         }
-        const totalPages = Math.ceil(response.total / 12);
+
+        if (page === 1) {
+          this.setState({ totalPages: Math.ceil(response.total / 12) });
+        }
 
         this.setState(prevState => ({
           images: [...prevState.images, ...data],
-          totalPages,
         }));
         this.setState({ isLoading: false });
       } catch (error) {
